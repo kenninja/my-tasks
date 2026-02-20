@@ -6,45 +6,34 @@
   <title>タスク管理</title>
   <style>
     :root {
-      --primary: #4f46e5;
-      --primary-light: #818cf8;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #1e293b;
-      --text-light: #64748b;
-      --border: #e2e8f0;
-      --danger: #ef4444;
-      --success: #22c55e;
-      --warning: #f59e0b;
-      --mail-color: #3b82f6;
-      --slack-color: #e11d48;
-      --other-color: #8b5cf6;
+      --primary: #4f46e5; --primary-light: #818cf8; --bg: #f8fafc; --card: #ffffff;
+      --text: #1e293b; --text-light: #64748b; --border: #e2e8f0;
+      --danger: #ef4444; --success: #22c55e; --warning: #f59e0b;
+      --mail-color: #3b82f6; --slack-color: #e11d48; --other-color: #8b5cf6;
       --radius: 12px;
       --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
       --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-      background: var(--bg); color: var(--text); min-height: 100vh;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
     .app { max-width: 720px; margin: 0 auto; padding: 16px; }
 
     .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; margin-bottom: 8px; }
     .header h1 { font-size: 1.5rem; font-weight: 700; }
-    .header-actions { display: flex; gap: 8px; }
-    .btn-icon {
-      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 12px; cursor: pointer; font-size: 0.8rem; color: var(--text-light); transition: all 0.15s;
-    }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-icon { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.8rem; color: var(--text-light); transition: all 0.15s; }
     .btn-icon:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-    /* アラートバナー */
-    .alert-banner {
-      display: none; background: linear-gradient(135deg, #fef2f2, #fff7ed);
-      border: 1px solid #fecaca; border-radius: var(--radius); padding: 14px 18px;
-      margin-bottom: 12px; cursor: pointer; transition: all 0.15s;
-    }
+    /* 同期ステータス */
+    .sync-status { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: var(--text-light); padding: 4px 10px; border-radius: 16px; background: #f1f5f9; cursor: pointer; border: 1px solid var(--border); transition: all 0.15s; }
+    .sync-status:hover { background: #e2e8f0; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .sync-dot.connected { background: var(--success); }
+    .sync-dot.offline { background: var(--text-light); }
+    .sync-dot.syncing { background: var(--warning); animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .alert-banner { display: none; background: linear-gradient(135deg, #fef2f2, #fff7ed); border: 1px solid #fecaca; border-radius: var(--radius); padding: 14px 18px; margin-bottom: 12px; cursor: pointer; transition: all 0.15s; }
     .alert-banner.show { display: block; }
     .alert-banner:hover { box-shadow: var(--shadow); }
     .alert-banner-title { font-weight: 700; font-size: 0.9rem; color: var(--danger); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
@@ -55,57 +44,29 @@
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
     .alert-banner.has-overdue { animation: pulse 2s ease-in-out infinite; }
 
-    /* 入力フォーム */
-    .input-section {
-      background: var(--card); border-radius: var(--radius); padding: 20px;
-      box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid var(--border);
-    }
+    .input-section { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 16px; border: 1px solid var(--border); }
     .input-main { display: flex; gap: 8px; margin-bottom: 12px; }
-    .input-main input[type="text"] {
-      flex: 1; padding: 12px 16px; border: 2px solid var(--border);
-      border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.15s;
-    }
+    .input-main input[type="text"] { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; transition: border-color 0.15s; }
     .input-main input[type="text"]:focus { border-color: var(--primary); }
-    .btn-add {
-      background: var(--primary); color: white; border: none; border-radius: 8px;
-      padding: 12px 24px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap;
-    }
+    .btn-add { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
     .btn-add:hover { background: var(--primary-light); }
     .input-options { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .option-group { display: flex; align-items: center; gap: 6px; }
     .option-group label { font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
     .source-buttons { display: flex; gap: 4px; }
-    .source-btn {
-      padding: 4px 12px; border: 1.5px solid var(--border); border-radius: 20px;
-      background: white; font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
-    }
+    .source-btn { padding: 4px 12px; border: 1.5px solid var(--border); border-radius: 20px; background: white; font-size: 0.8rem; cursor: pointer; transition: all 0.15s; }
     .source-btn.active[data-source="mail"] { background: var(--mail-color); color: white; border-color: var(--mail-color); }
     .source-btn.active[data-source="slack"] { background: var(--slack-color); color: white; border-color: var(--slack-color); }
     .source-btn.active[data-source="other"] { background: var(--other-color); color: white; border-color: var(--other-color); }
-    .input-options input[type="date"], .input-options input[type="time"] {
-      padding: 4px 8px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none;
-    }
-    .input-options select {
-      padding: 4px 8px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; background: white;
-    }
+    .input-options input[type="date"], .input-options input[type="time"] { padding: 4px 8px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .input-options select { padding: 4px 8px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; outline: none; background: white; }
 
-    /* フィルターバー */
     .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
-    .filter-bar select {
-      padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px;
-      font-size: 0.85rem; background: var(--card); outline: none; cursor: pointer;
-    }
+    .filter-bar select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; background: var(--card); outline: none; cursor: pointer; }
     .task-count { margin-left: auto; font-size: 0.85rem; color: var(--text-light); }
 
-    /* タスクリスト */
     .task-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .task-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 16px; display: flex; align-items: flex-start; gap: 12px;
-      box-shadow: var(--shadow); transition: all 0.15s; animation: slideIn 0.2s ease-out;
-      user-select: none;
-    }
+    .task-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: var(--shadow); transition: all 0.15s; animation: slideIn 0.2s ease-out; user-select: none; }
     @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
     .task-card:hover { box-shadow: var(--shadow-lg); }
     .task-card.completed { opacity: 0.55; }
@@ -114,32 +75,19 @@
     .task-card.due-today { border-left: 4px solid var(--warning); }
     .task-card.due-soon { border-left: 4px solid #fb923c; }
     .task-card.due-minutes { border-left: 4px solid var(--danger); }
-
-    /* ドラッグ&ドロップ */
-    .drag-handle {
-      cursor: grab; color: var(--border); font-size: 1.1rem; padding: 0 4px;
-      display: flex; align-items: center; flex-shrink: 0; margin-top: 2px;
-      transition: color 0.15s;
-    }
+    .drag-handle { cursor: grab; color: var(--border); font-size: 1.1rem; padding: 0 4px; display: flex; align-items: center; flex-shrink: 0; margin-top: 2px; transition: color 0.15s; }
     .drag-handle:hover { color: var(--text-light); }
     .drag-handle:active { cursor: grabbing; }
     .task-card.dragging { opacity: 0.4; transform: scale(0.98); }
     .task-card.drag-over { border-top: 3px solid var(--primary); margin-top: -3px; }
-
-    .task-checkbox {
-      width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 2px; transition: all 0.15s;
-    }
+    .task-checkbox { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all 0.15s; }
     .task-checkbox:hover { border-color: var(--primary); }
     .task-checkbox.checked { background: var(--success); border-color: var(--success); }
     .task-checkbox.checked::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
-
     .task-body { flex: 1; min-width: 0; cursor: pointer; }
     .task-body:hover .task-title { color: var(--primary); }
     .task-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 6px; word-break: break-word; transition: color 0.15s; }
     .task-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-
     .tag { padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
     .tag-mail { background: #dbeafe; color: var(--mail-color); }
     .tag-slack { background: #fce7f3; color: var(--slack-color); }
@@ -155,74 +103,51 @@
     .tag-priority.high { color: var(--danger); }
     .tag-priority.medium { color: var(--warning); }
     .tag-priority.low { color: var(--success); }
-
     .task-actions { display: flex; gap: 4px; flex-shrink: 0; }
-    .btn-task-action {
-      background: none; border: none; color: var(--text-light);
-      cursor: pointer; padding: 4px 8px; border-radius: 6px;
-      font-size: 0.85rem; opacity: 0; transition: all 0.15s;
-    }
+    .btn-task-action { background: none; border: none; color: var(--text-light); cursor: pointer; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; opacity: 0; transition: all 0.15s; }
     .task-card:hover .btn-task-action { opacity: 1; }
     .btn-task-action:hover { background: #f1f5f9; color: var(--primary); }
     .btn-task-action.delete:hover { background: #fee2e2; color: var(--danger); }
-
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
     .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
 
-    /* モーダル共通 */
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%; background: rgba(0,0,0,0.4);
-      z-index: 100; align-items: center; justify-content: center;
-    }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
-    .modal {
-      background: var(--card); border-radius: var(--radius); padding: 24px;
-      max-width: 460px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto;
-    }
+    .modal { background: var(--card); border-radius: var(--radius); padding: 24px; max-width: 460px; width: 90%; box-shadow: var(--shadow-lg); max-height: 90vh; overflow-y: auto; }
     .modal h3 { margin-bottom: 16px; }
     .modal p { margin-bottom: 12px; font-size: 0.9rem; color: var(--text-light); }
     .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-    .btn-modal {
-      padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--card); cursor: pointer; font-size: 0.9rem;
-    }
+    .btn-modal { padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); cursor: pointer; font-size: 0.9rem; }
     .btn-modal.primary { background: var(--primary); color: white; border-color: var(--primary); }
     .btn-modal.danger { background: var(--danger); color: white; border-color: var(--danger); }
 
-    /* 編集モーダル */
     .edit-form { display: flex; flex-direction: column; gap: 14px; }
     .edit-field { display: flex; flex-direction: column; gap: 4px; }
     .edit-field label { font-size: 0.85rem; color: var(--text-light); font-weight: 600; }
-    .edit-field input, .edit-field select {
-      padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
-      font-size: 0.9rem; outline: none; background: white;
-    }
+    .edit-field input, .edit-field select { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; background: white; }
     .edit-field input:focus, .edit-field select:focus { border-color: var(--primary); }
     .edit-field .source-buttons { margin-top: 2px; }
     .edit-row { display: flex; gap: 12px; }
     .edit-row .edit-field { flex: 1; }
 
-    /* 通知バー */
-    .notification-bar {
-      display: none; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px;
-      padding: 10px 16px; margin-bottom: 12px; font-size: 0.85rem; color: #92400e;
-      cursor: pointer; align-items: center; gap: 8px;
-    }
+    .notification-bar { display: none; background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; font-size: 0.85rem; color: #92400e; cursor: pointer; align-items: center; gap: 8px; }
     .notification-bar.show { display: flex; }
 
-    /* トースト */
     .toast-container { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
-    .toast {
-      background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--danger);
-      border-radius: 8px; padding: 12px 16px; box-shadow: var(--shadow-lg);
-      min-width: 280px; max-width: 380px; animation: toastIn 0.3s ease-out; cursor: pointer;
-    }
+    .toast { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--danger); border-radius: 8px; padding: 12px 16px; box-shadow: var(--shadow-lg); min-width: 280px; max-width: 380px; animation: toastIn 0.3s ease-out; cursor: pointer; }
     .toast.warning { border-left-color: var(--warning); }
+    .toast.success { border-left-color: var(--success); }
     @keyframes toastIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
     @keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(60px); } }
     .toast-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
     .toast-body { font-size: 0.8rem; color: var(--text-light); }
+
+    /* 同期モーダル */
+    .sync-input { padding: 12px 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.1rem; width: 100%; outline: none; text-align: center; letter-spacing: 2px; font-weight: 600; }
+    .sync-input:focus { border-color: var(--primary); }
+    .sync-info { font-size: 0.8rem; color: var(--text-light); text-align: center; margin-top: 8px; }
+    .sync-current { background: #f1f5f9; border-radius: 8px; padding: 10px; text-align: center; font-size: 0.9rem; margin-bottom: 12px; }
+    .sync-current code { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
 
     @media (max-width: 600px) {
       .app { padding: 8px; }
@@ -239,6 +164,8 @@
       .toast { min-width: unset; max-width: calc(100vw - 32px); }
       .edit-row { flex-direction: column; gap: 14px; }
       .drag-handle { display: none; }
+      .header-actions { gap: 4px; }
+      .btn-icon { padding: 6px 8px; font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -247,177 +174,72 @@
     <div class="header">
       <h1>タスク管理</h1>
       <div class="header-actions">
+        <div class="sync-status" id="syncStatus" onclick="showSyncModal()" title="同期設定">
+          <span class="sync-dot offline" id="syncDot"></span>
+          <span id="syncLabel">未接続</span>
+        </div>
         <button class="btn-icon" onclick="exportTasks()">エクスポート</button>
         <button class="btn-icon" onclick="showImportModal()">インポート</button>
       </div>
     </div>
-
     <div class="alert-banner" id="alertBanner" onclick="scrollToUrgent()"></div>
-    <div class="notification-bar" id="notificationBar" onclick="requestNotification()">
-      🔔 リマインダー通知を有効にするにはここをクリック
-    </div>
-
+    <div class="notification-bar" id="notificationBar" onclick="requestNotification()">🔔 リマインダー通知を有効にするにはここをクリック</div>
     <div class="input-section">
       <div class="input-main">
         <input type="text" id="taskInput" placeholder="タスクを入力... (Enter で追加)" autocomplete="off">
         <button class="btn-add" onclick="addTask()">追加</button>
       </div>
       <div class="input-options">
-        <div class="option-group">
-          <label>ソース:</label>
-          <div class="source-buttons">
-            <button class="source-btn active" data-source="mail" onclick="setSource('mail')">メール</button>
-            <button class="source-btn" data-source="slack" onclick="setSource('slack')">Slack</button>
-            <button class="source-btn" data-source="other" onclick="setSource('other')">その他</button>
-          </div>
-        </div>
-        <div class="option-group">
-          <label>期限:</label>
-          <input type="date" id="deadlineInput">
-          <input type="time" id="deadlineTimeInput">
-        </div>
-        <div class="option-group">
-          <label>優先度:</label>
-          <select id="priorityInput">
-            <option value="medium">中</option>
-            <option value="high">高</option>
-            <option value="low">低</option>
-          </select>
-        </div>
-        <div class="option-group">
-          <label>繰り返し:</label>
-          <select id="repeatInput">
-            <option value="none">なし</option>
-            <option value="daily">毎日</option>
-            <option value="weekly">毎週</option>
-            <option value="biweekly">隔週</option>
-            <option value="monthly">毎月</option>
-          </select>
-        </div>
-        <div class="option-group">
-          <label>アラート:</label>
-          <select id="alertInput">
-            <option value="none">なし</option>
-            <option value="1min">1分前</option>
-            <option value="5min">5分前</option>
-            <option value="same-day">当日</option>
-            <option value="1day">1日前</option>
-            <option value="3days">3日前</option>
-            <option value="1week">1週間前</option>
-          </select>
-        </div>
+        <div class="option-group"><label>ソース:</label><div class="source-buttons"><button class="source-btn active" data-source="mail" onclick="setSource('mail')">メール</button><button class="source-btn" data-source="slack" onclick="setSource('slack')">Slack</button><button class="source-btn" data-source="other" onclick="setSource('other')">その他</button></div></div>
+        <div class="option-group"><label>期限:</label><input type="date" id="deadlineInput"><input type="time" id="deadlineTimeInput"></div>
+        <div class="option-group"><label>優先度:</label><select id="priorityInput"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></div>
+        <div class="option-group"><label>繰り返し:</label><select id="repeatInput"><option value="none">なし</option><option value="daily">毎日</option><option value="weekly">毎週</option><option value="biweekly">隔週</option><option value="monthly">毎月</option></select></div>
+        <div class="option-group"><label>アラート:</label><select id="alertInput"><option value="none">なし</option><option value="1min">1分前</option><option value="5min">5分前</option><option value="same-day">当日</option><option value="1day">1日前</option><option value="3days">3日前</option><option value="1week">1週間前</option></select></div>
       </div>
     </div>
-
     <div class="filter-bar">
-      <select id="filterSource" onchange="renderTasks()">
-        <option value="all">すべてのソース</option>
-        <option value="mail">メール</option>
-        <option value="slack">Slack</option>
-        <option value="other">その他</option>
-      </select>
-      <select id="filterStatus" onchange="renderTasks()">
-        <option value="active">未完了</option>
-        <option value="all">すべて</option>
-        <option value="completed">完了済み</option>
-      </select>
-      <select id="sortBy" onchange="renderTasks()">
-        <option value="manual">手動並び替え</option>
-        <option value="created">作成日順</option>
-        <option value="deadline">期限順</option>
-        <option value="priority">優先度順</option>
-      </select>
+      <select id="filterSource" onchange="renderTasks()"><option value="all">すべてのソース</option><option value="mail">メール</option><option value="slack">Slack</option><option value="other">その他</option></select>
+      <select id="filterStatus" onchange="renderTasks()"><option value="active">未完了</option><option value="all">すべて</option><option value="completed">完了済み</option></select>
+      <select id="sortBy" onchange="renderTasks()"><option value="manual">手動並び替え</option><option value="created">作成日順</option><option value="deadline">期限順</option><option value="priority">優先度順</option></select>
       <span class="task-count" id="taskCount"></span>
     </div>
-
     <div class="task-list" id="taskList"></div>
   </div>
-
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- 同期設定モーダル -->
+  <div class="modal-overlay" id="syncModal">
+    <div class="modal">
+      <h3>デバイス間同期</h3>
+      <div id="syncModalContent"></div>
+    </div>
+  </div>
   <!-- インポートモーダル -->
-  <div class="modal-overlay" id="importModal">
-    <div class="modal">
-      <h3>データをインポート</h3>
-      <p>JSONファイルを選択してタスクデータをインポートします。現在のデータは上書きされます。</p>
-      <input type="file" id="importFile" accept=".json">
-      <div class="modal-actions">
-        <button class="btn-modal" onclick="closeImportModal()">キャンセル</button>
-        <button class="btn-modal primary" onclick="importTasks()">インポート</button>
-      </div>
-    </div>
-  </div>
-
+  <div class="modal-overlay" id="importModal"><div class="modal"><h3>データをインポート</h3><p>JSONファイルを選択してタスクデータをインポートします。現在のデータは上書きされます。</p><input type="file" id="importFile" accept=".json"><div class="modal-actions"><button class="btn-modal" onclick="closeImportModal()">キャンセル</button><button class="btn-modal primary" onclick="importTasks()">インポート</button></div></div></div>
   <!-- 編集モーダル -->
-  <div class="modal-overlay" id="editModal">
-    <div class="modal">
-      <h3>タスクを編集</h3>
-      <div class="edit-form">
-        <div class="edit-field">
-          <label>タスク名</label>
-          <input type="text" id="editTitle">
-        </div>
-        <div class="edit-field">
-          <label>ソース</label>
-          <div class="source-buttons" id="editSourceButtons">
-            <button class="source-btn" data-source="mail" onclick="setEditSource('mail')">メール</button>
-            <button class="source-btn" data-source="slack" onclick="setEditSource('slack')">Slack</button>
-            <button class="source-btn" data-source="other" onclick="setEditSource('other')">その他</button>
-          </div>
-        </div>
-        <div class="edit-row">
-          <div class="edit-field">
-            <label>期限日</label>
-            <input type="date" id="editDeadline">
-          </div>
-          <div class="edit-field">
-            <label>時刻</label>
-            <input type="time" id="editDeadlineTime">
-          </div>
-        </div>
-        <div class="edit-row">
-          <div class="edit-field">
-            <label>優先度</label>
-            <select id="editPriority">
-              <option value="medium">中</option>
-              <option value="high">高</option>
-              <option value="low">低</option>
-            </select>
-          </div>
-          <div class="edit-field">
-            <label>繰り返し</label>
-            <select id="editRepeat">
-              <option value="none">なし</option>
-              <option value="daily">毎日</option>
-              <option value="weekly">毎週</option>
-              <option value="biweekly">隔週</option>
-              <option value="monthly">毎月</option>
-            </select>
-          </div>
-        </div>
-        <div class="edit-field">
-          <label>アラート</label>
-          <select id="editAlert">
-            <option value="none">なし</option>
-            <option value="1min">1分前</option>
-            <option value="5min">5分前</option>
-            <option value="same-day">当日</option>
-            <option value="1day">1日前</option>
-            <option value="3days">3日前</option>
-            <option value="1week">1週間前</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-modal danger" onclick="deleteEditingTask()">削除</button>
-        <span style="flex:1"></span>
-        <button class="btn-modal" onclick="closeEditModal()">キャンセル</button>
-        <button class="btn-modal primary" onclick="saveEdit()">保存</button>
-      </div>
-    </div>
-  </div>
+  <div class="modal-overlay" id="editModal"><div class="modal"><h3>タスクを編集</h3><div class="edit-form"><div class="edit-field"><label>タスク名</label><input type="text" id="editTitle"></div><div class="edit-field"><label>ソース</label><div class="source-buttons" id="editSourceButtons"><button class="source-btn" data-source="mail" onclick="setEditSource('mail')">メール</button><button class="source-btn" data-source="slack" onclick="setEditSource('slack')">Slack</button><button class="source-btn" data-source="other" onclick="setEditSource('other')">その他</button></div></div><div class="edit-row"><div class="edit-field"><label>期限日</label><input type="date" id="editDeadline"></div><div class="edit-field"><label>時刻</label><input type="time" id="editDeadlineTime"></div></div><div class="edit-row"><div class="edit-field"><label>優先度</label><select id="editPriority"><option value="medium">中</option><option value="high">高</option><option value="low">低</option></select></div><div class="edit-field"><label>繰り返し</label><select id="editRepeat"><option value="none">なし</option><option value="daily">毎日</option><option value="weekly">毎週</option><option value="biweekly">隔週</option><option value="monthly">毎月</option></select></div></div><div class="edit-field"><label>アラート</label><select id="editAlert"><option value="none">なし</option><option value="1min">1分前</option><option value="5min">5分前</option><option value="same-day">当日</option><option value="1day">1日前</option><option value="3days">3日前</option><option value="1week">1週間前</option></select></div></div><div class="modal-actions"><button class="btn-modal danger" onclick="deleteEditingTask()">削除</button><span style="flex:1"></span><button class="btn-modal" onclick="closeEditModal()">キャンセル</button><button class="btn-modal primary" onclick="saveEdit()">保存</button></div></div></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
   <script>
+    // ---- Firebase ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZsCD3WIyv_DwG0F4RUb04T7yc4s6ofMU",
+      authDomain: "my-tasks-74a8f.firebaseapp.com",
+      projectId: "my-tasks-74a8f",
+      storageBucket: "my-tasks-74a8f.firebasestorage.app",
+      messagingSenderId: "265280468538",
+      appId: "1:265280468538:web:85286fb38021be6e746703"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    let unsubscribe = null;
+    let syncCode = localStorage.getItem('task-sync-code') || null;
+    let syncingFromRemote = false;
+
+    // ---- データ ----
     const STORAGE_KEY = 'task-manager-data';
     let tasks = [];
     let currentSource = 'mail';
@@ -425,398 +247,265 @@
     let editSource = 'mail';
     let draggedId = null;
 
-    function loadTasks() {
-      try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { tasks = []; }
+    function loadTasks() { try { tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { tasks = []; } }
+    function saveTasks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      if (syncCode && !syncingFromRemote) syncToFirestore();
     }
-    function saveTasks() { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); }
+
+    // ---- Firebase同期 ----
+    function syncToFirestore() {
+      if (!syncCode) return;
+      setSyncStatus('syncing');
+      db.collection('rooms').doc(syncCode).set({
+        tasks: JSON.parse(JSON.stringify(tasks)),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => setSyncStatus('connected'))
+        .catch(() => setSyncStatus('offline'));
+    }
+
+    function startRealtimeSync() {
+      if (unsubscribe) unsubscribe();
+      if (!syncCode) { setSyncStatus('offline'); return; }
+      setSyncStatus('syncing');
+      unsubscribe = db.collection('rooms').doc(syncCode).onSnapshot(
+        doc => {
+          if (doc.exists && doc.data().tasks) {
+            syncingFromRemote = true;
+            tasks = doc.data().tasks;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+            renderTasks(); updateAlertBanner();
+            syncingFromRemote = false;
+          }
+          setSyncStatus('connected');
+        },
+        () => setSyncStatus('offline')
+      );
+    }
+
+    function setSyncStatus(status) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncLabel');
+      dot.className = 'sync-dot ' + status;
+      label.textContent = { connected: '同期中', syncing: '同期中...', offline: '未接続' }[status] || '未接続';
+    }
+
+    // ---- 同期モーダル ----
+    function showSyncModal() {
+      const content = document.getElementById('syncModalContent');
+      if (syncCode) {
+        content.innerHTML = `
+          <div class="sync-current">現在の同期コード: <code>${escapeHtml(syncCode)}</code></div>
+          <p>他のデバイスでも同じコードを入力すると、タスクが自動同期されます。</p>
+          <div class="edit-field"><label>同期コードを変更</label><input type="text" id="syncCodeInput" class="sync-input" placeholder="新しい同期コード" value="${escapeHtml(syncCode)}"></div>
+          <div class="sync-info">英数字で自由に設定できます</div>
+          <div class="modal-actions">
+            <button class="btn-modal danger" onclick="disconnectSync()">同期を解除</button>
+            <span style="flex:1"></span>
+            <button class="btn-modal" onclick="closeSyncModal()">閉じる</button>
+            <button class="btn-modal primary" onclick="applySyncCode()">変更</button>
+          </div>`;
+      } else {
+        content.innerHTML = `
+          <p>同期コードを設定すると、PCとスマホでタスクをリアルタイム同期できます。</p>
+          <p>両方のデバイスで同じコードを入力してください。</p>
+          <div class="edit-field"><label>同期コード</label><input type="text" id="syncCodeInput" class="sync-input" placeholder="例: mytasks123" autocomplete="off"></div>
+          <div class="sync-info">英数字で自由に設定できます（覚えやすいものがおすすめ）</div>
+          <div class="modal-actions">
+            <button class="btn-modal" onclick="closeSyncModal()">あとで</button>
+            <button class="btn-modal primary" onclick="applySyncCode()">同期を開始</button>
+          </div>`;
+      }
+      document.getElementById('syncModal').classList.add('active');
+      setTimeout(() => { const inp = document.getElementById('syncCodeInput'); if (inp) inp.focus(); }, 100);
+    }
+
+    function applySyncCode() {
+      const input = document.getElementById('syncCodeInput');
+      const code = input.value.trim();
+      if (!code) { alert('同期コードを入力してください'); return; }
+      if (code.length < 3) { alert('3文字以上で入力してください'); return; }
+      syncCode = code;
+      localStorage.setItem('task-sync-code', syncCode);
+      // まずFirestoreからデータを読み込み（既存データがあればそちらを使う）
+      db.collection('rooms').doc(syncCode).get().then(doc => {
+        if (doc.exists && doc.data().tasks && doc.data().tasks.length > 0) {
+          tasks = doc.data().tasks;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+          renderTasks(); updateAlertBanner();
+          showToast('同期完了', `${tasks.length}件のタスクを読み込みました`, 'success');
+        } else {
+          syncToFirestore();
+          showToast('同期を開始しました', '他のデバイスで同じコードを入力してください', 'success');
+        }
+        startRealtimeSync();
+      }).catch(() => {
+        syncToFirestore();
+        startRealtimeSync();
+      });
+      closeSyncModal();
+    }
+
+    function disconnectSync() {
+      if (!confirm('同期を解除しますか？ローカルのデータは保持されます。')) return;
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+      syncCode = null;
+      localStorage.removeItem('task-sync-code');
+      setSyncStatus('offline');
+      closeSyncModal();
+    }
+
+    function closeSyncModal() { document.getElementById('syncModal').classList.remove('active'); }
 
     // ---- DateTime ----
-    function getDeadlineDate(task) {
-      if (!task.deadline) return null;
-      return task.deadlineTime
-        ? new Date(`${task.deadline}T${task.deadlineTime}:00`)
-        : new Date(`${task.deadline}T23:59:59`);
-    }
-    function getMinutesUntil(task) {
-      const dt = getDeadlineDate(task);
-      return dt ? Math.floor((dt - new Date()) / 60000) : null;
-    }
-    function getDaysUntil(task) {
-      if (!task.deadline) return null;
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      return Math.floor((new Date(task.deadline + 'T00:00:00') - today) / 86400000);
-    }
+    function getDeadlineDate(task) { if (!task.deadline) return null; return task.deadlineTime ? new Date(`${task.deadline}T${task.deadlineTime}:00`) : new Date(`${task.deadline}T23:59:59`); }
+    function getMinutesUntil(task) { const dt = getDeadlineDate(task); return dt ? Math.floor((dt - new Date()) / 60000) : null; }
+    function getDaysUntil(task) { if (!task.deadline) return null; const t = new Date(); t.setHours(0,0,0,0); return Math.floor((new Date(task.deadline+'T00:00:00') - t) / 86400000); }
 
     // ---- CRUD ----
     function addTask() {
-      const input = document.getElementById('taskInput');
-      const title = input.value.trim();
+      const input = document.getElementById('taskInput'), title = input.value.trim();
       if (!title) return;
-      const task = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-        title,
-        source: currentSource,
-        deadline: document.getElementById('deadlineInput').value || null,
-        deadlineTime: document.getElementById('deadlineTimeInput').value || null,
-        priority: document.getElementById('priorityInput').value,
-        repeat: document.getElementById('repeatInput').value,
-        alertBefore: document.getElementById('alertInput').value,
-        completed: false,
-        createdAt: new Date().toISOString(),
-        notified: false, alertNotified: false
-      };
-      tasks.unshift(task);
-      saveTasks(); renderTasks(); updateAlertBanner();
-      input.value = ''; input.focus();
+      tasks.unshift({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), title, source: currentSource,
+        deadline: document.getElementById('deadlineInput').value || null, deadlineTime: document.getElementById('deadlineTimeInput').value || null,
+        priority: document.getElementById('priorityInput').value, repeat: document.getElementById('repeatInput').value,
+        alertBefore: document.getElementById('alertInput').value, completed: false, createdAt: new Date().toISOString(), notified: false, alertNotified: false
+      });
+      saveTasks(); renderTasks(); updateAlertBanner(); input.value = ''; input.focus();
     }
-
     function toggleTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
+      const task = tasks.find(t => t.id === id); if (!task) return;
       task.completed = !task.completed;
       if (task.completed && task.repeat !== 'none' && task.deadline) {
-        const nextDeadline = calcNextDeadline(task.deadline, task.repeat);
-        const next = { ...task, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-          deadline: nextDeadline, completed: false, createdAt: new Date().toISOString(), notified: false, alertNotified: false };
-        tasks.unshift(next);
-        showToast('🔄 次回タスクを作成しました', `${task.title} — 期限: ${formatDateTime(nextDeadline, task.deadlineTime)}`, 'warning');
+        const nd = calcNextDeadline(task.deadline, task.repeat);
+        tasks.unshift({ ...task, id: Date.now().toString(36)+Math.random().toString(36).slice(2,7), deadline: nd, completed: false, createdAt: new Date().toISOString(), notified: false, alertNotified: false });
+        showToast('🔄 次回タスクを作成しました', `${task.title} — 期限: ${formatDateTime(nd, task.deadlineTime)}`, 'warning');
       }
       saveTasks(); renderTasks(); updateAlertBanner();
     }
+    function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); saveTasks(); renderTasks(); updateAlertBanner(); }
 
-    function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      saveTasks(); renderTasks(); updateAlertBanner();
-    }
-
-    // ---- 編集モーダル ----
+    // ---- 編集 ----
     function openEditModal(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      editingTaskId = id;
-      document.getElementById('editTitle').value = task.title;
-      setEditSource(task.source);
-      document.getElementById('editDeadline').value = task.deadline || '';
-      document.getElementById('editDeadlineTime').value = task.deadlineTime || '';
-      document.getElementById('editPriority').value = task.priority;
-      document.getElementById('editRepeat').value = task.repeat || 'none';
-      document.getElementById('editAlert').value = task.alertBefore || 'none';
-      document.getElementById('editModal').classList.add('active');
-      document.getElementById('editTitle').focus();
+      const t = tasks.find(x => x.id === id); if (!t) return; editingTaskId = id;
+      document.getElementById('editTitle').value = t.title; setEditSource(t.source);
+      document.getElementById('editDeadline').value = t.deadline || ''; document.getElementById('editDeadlineTime').value = t.deadlineTime || '';
+      document.getElementById('editPriority').value = t.priority; document.getElementById('editRepeat').value = t.repeat || 'none'; document.getElementById('editAlert').value = t.alertBefore || 'none';
+      document.getElementById('editModal').classList.add('active'); document.getElementById('editTitle').focus();
     }
-
-    function setEditSource(source) {
-      editSource = source;
-      document.querySelectorAll('#editSourceButtons .source-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.source === source);
-      });
-    }
-
+    function setEditSource(s) { editSource = s; document.querySelectorAll('#editSourceButtons .source-btn').forEach(b => b.classList.toggle('active', b.dataset.source === s)); }
     function saveEdit() {
-      const task = tasks.find(t => t.id === editingTaskId);
-      if (!task) return;
-      const newTitle = document.getElementById('editTitle').value.trim();
-      if (!newTitle) return;
-      const oldDeadline = task.deadline;
-      const oldTime = task.deadlineTime;
-      const oldAlert = task.alertBefore;
-      task.title = newTitle;
-      task.source = editSource;
-      task.deadline = document.getElementById('editDeadline').value || null;
-      task.deadlineTime = document.getElementById('editDeadlineTime').value || null;
-      task.priority = document.getElementById('editPriority').value;
-      task.repeat = document.getElementById('editRepeat').value;
-      task.alertBefore = document.getElementById('editAlert').value;
-      // 期限やアラートが変更された場合、通知フラグをリセット
-      if (task.deadline !== oldDeadline || task.deadlineTime !== oldTime) { task.notified = false; }
-      if (task.alertBefore !== oldAlert || task.deadline !== oldDeadline || task.deadlineTime !== oldTime) { task.alertNotified = false; }
-      saveTasks(); renderTasks(); updateAlertBanner();
-      closeEditModal();
+      const t = tasks.find(x => x.id === editingTaskId); if (!t) return;
+      const title = document.getElementById('editTitle').value.trim(); if (!title) return;
+      const od = t.deadline, ot = t.deadlineTime, oa = t.alertBefore;
+      t.title = title; t.source = editSource; t.deadline = document.getElementById('editDeadline').value || null;
+      t.deadlineTime = document.getElementById('editDeadlineTime').value || null; t.priority = document.getElementById('editPriority').value;
+      t.repeat = document.getElementById('editRepeat').value; t.alertBefore = document.getElementById('editAlert').value;
+      if (t.deadline !== od || t.deadlineTime !== ot) t.notified = false;
+      if (t.alertBefore !== oa || t.deadline !== od || t.deadlineTime !== ot) t.alertNotified = false;
+      saveTasks(); renderTasks(); updateAlertBanner(); closeEditModal();
     }
+    function deleteEditingTask() { if (editingTaskId && confirm('このタスクを削除しますか？')) { deleteTask(editingTaskId); closeEditModal(); } }
+    function closeEditModal() { document.getElementById('editModal').classList.remove('active'); editingTaskId = null; }
 
-    function deleteEditingTask() {
-      if (editingTaskId && confirm('このタスクを削除しますか？')) {
-        deleteTask(editingTaskId);
-        closeEditModal();
-      }
-    }
+    // ---- ドラッグ ----
+    function onDragStart(e, id) { draggedId = id; e.currentTarget.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+    function onDragEnd(e) { e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); draggedId = null; }
+    function onDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; const c = e.target.closest('.task-card'); if (c && c.dataset.id !== draggedId) { document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); c.classList.add('drag-over'); } }
+    function onDrop(e, tid) { e.preventDefault(); document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); if (!draggedId || draggedId === tid) return; const fi = tasks.findIndex(t => t.id === draggedId), ti = tasks.findIndex(t => t.id === tid); if (fi===-1||ti===-1) return; const [m] = tasks.splice(fi, 1); tasks.splice(ti, 0, m); saveTasks(); renderTasks(); document.getElementById('sortBy').value = 'manual'; }
 
-    function closeEditModal() {
-      document.getElementById('editModal').classList.remove('active');
-      editingTaskId = null;
-    }
-
-    // ---- ドラッグ&ドロップ ----
-    function onDragStart(e, id) {
-      draggedId = id;
-      e.currentTarget.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    }
-    function onDragEnd(e) {
-      e.currentTarget.classList.remove('dragging');
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      draggedId = null;
-    }
-    function onDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      const card = e.target.closest('.task-card');
-      if (card && card.dataset.id !== draggedId) {
-        document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-        card.classList.add('drag-over');
-      }
-    }
-    function onDrop(e, targetId) {
-      e.preventDefault();
-      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-      if (!draggedId || draggedId === targetId) return;
-      const fromIdx = tasks.findIndex(t => t.id === draggedId);
-      const toIdx = tasks.findIndex(t => t.id === targetId);
-      if (fromIdx === -1 || toIdx === -1) return;
-      const [moved] = tasks.splice(fromIdx, 1);
-      tasks.splice(toIdx, 0, moved);
-      saveTasks(); renderTasks();
-      // 手動並び替えに切り替え
-      document.getElementById('sortBy').value = 'manual';
-    }
-
-    // ---- 繰り返し ----
-    function calcNextDeadline(d, r) {
-      const dt = new Date(d + 'T00:00:00');
-      if (r === 'daily') dt.setDate(dt.getDate() + 1);
-      else if (r === 'weekly') dt.setDate(dt.getDate() + 7);
-      else if (r === 'biweekly') dt.setDate(dt.getDate() + 14);
-      else if (r === 'monthly') dt.setMonth(dt.getMonth() + 1);
-      return dt.toISOString().slice(0, 10);
-    }
-    function getRepeatLabel(r) { return { daily: '毎日', weekly: '毎週', biweekly: '隔週', monthly: '毎月' }[r] || ''; }
-    function getAlertLabel(a) { return { '1min': '1分前', '5min': '5分前', 'same-day': '当日', '1day': '1日前', '3days': '3日前', '1week': '1週間前' }[a] || ''; }
-
-    // ---- ソース ----
-    function setSource(s) {
-      currentSource = s;
-      document.querySelectorAll('.input-section .source-btn').forEach(b => b.classList.toggle('active', b.dataset.source === s));
-    }
-
-    // ---- 表示 ----
-    function getDeadlineStatus(task) {
-      if (!task.deadline) return '';
-      const mins = getMinutesUntil(task), days = getDaysUntil(task);
-      if (mins !== null && mins < 0) return 'overdue';
-      if (task.deadlineTime && mins !== null && mins <= 5) return 'due-minutes';
-      if (days === 0) return 'due-today';
-      if (days > 0 && days <= 3) return 'due-soon';
-      if (days < 0) return 'overdue';
-      return '';
-    }
-    function formatDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return `${dt.getMonth() + 1}/${dt.getDate()}`; }
-    function formatTime(t) { return t ? t.slice(0, 5) : ''; }
-    function formatDateTime(d, t) { let s = formatDate(d); if (t) s += ' ' + formatTime(t); return s; }
-    function getDeadlineSuffix(task) {
-      const st = getDeadlineStatus(task), mins = getMinutesUntil(task), days = getDaysUntil(task);
-      if (st === 'overdue') {
-        if (task.deadlineTime && mins !== null) { const a = Math.abs(mins); return a < 60 ? ` (${a}分超過)` : a < 1440 ? ` (${Math.floor(a/60)}時間超過)` : ` (${Math.abs(days)}日超過)`; }
-        return ` (${Math.abs(days)}日超過)`;
-      }
-      if (st === 'due-minutes') return mins <= 0 ? ' (まもなく)' : ` (あと${mins}分)`;
-      if (st === 'due-today') {
-        if (task.deadlineTime && mins !== null) return mins < 60 ? ` (あと${mins}分)` : ` (あと${Math.floor(mins/60)}時間)`;
-        return ' (今日)';
-      }
-      if (st === 'due-soon') return ` (あと${days}日)`;
-      return '';
-    }
-    function getSourceLabel(s) { return { mail: 'メール', slack: 'Slack', other: 'その他' }[s] || s; }
-    function getPriorityLabel(p) { return { high: '高', medium: '中', low: '低' }[p] || p; }
-
-    // ---- フィルター・ソート ----
-    function getFilteredAndSorted() {
-      const fs = document.getElementById('filterSource').value;
-      const fst = document.getElementById('filterStatus').value;
-      const sb = document.getElementById('sortBy').value;
-      let f = tasks.filter(t => {
-        if (fs !== 'all' && t.source !== fs) return false;
-        if (fst === 'active' && t.completed) return false;
-        if (fst === 'completed' && !t.completed) return false;
-        return true;
-      });
-      if (sb === 'manual') return f; // 手動順はtasks配列の順序をそのまま使う
-      const po = { high: 0, medium: 1, low: 2 };
-      f.sort((a, b) => {
-        if (sb === 'deadline') { const da = getDeadlineDate(a), db = getDeadlineDate(b); if (!da && !db) return 0; if (!da) return 1; if (!db) return -1; return da - db; }
-        if (sb === 'priority') return (po[a.priority] ?? 1) - (po[b.priority] ?? 1);
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
-      return f;
-    }
+    // ---- ヘルパー ----
+    function calcNextDeadline(d, r) { const dt = new Date(d+'T00:00:00'); if(r==='daily')dt.setDate(dt.getDate()+1); else if(r==='weekly')dt.setDate(dt.getDate()+7); else if(r==='biweekly')dt.setDate(dt.getDate()+14); else if(r==='monthly')dt.setMonth(dt.getMonth()+1); return dt.toISOString().slice(0,10); }
+    function getRepeatLabel(r) { return {daily:'毎日',weekly:'毎週',biweekly:'隔週',monthly:'毎月'}[r]||''; }
+    function getAlertLabel(a) { return {'1min':'1分前','5min':'5分前','same-day':'当日','1day':'1日前','3days':'3日前','1week':'1週間前'}[a]||''; }
+    function setSource(s) { currentSource = s; document.querySelectorAll('.input-section .source-btn').forEach(b => b.classList.toggle('active', b.dataset.source === s)); }
+    function getDeadlineStatus(task) { if(!task.deadline) return ''; const m=getMinutesUntil(task),d=getDaysUntil(task); if(m!==null&&m<0) return 'overdue'; if(task.deadlineTime&&m!==null&&m<=5) return 'due-minutes'; if(d===0) return 'due-today'; if(d>0&&d<=3) return 'due-soon'; if(d<0) return 'overdue'; return ''; }
+    function formatDate(d) { if(!d) return ''; const dt=new Date(d+'T00:00:00'); return `${dt.getMonth()+1}/${dt.getDate()}`; }
+    function formatTime(t) { return t ? t.slice(0,5) : ''; }
+    function formatDateTime(d,t) { let s=formatDate(d); if(t) s+=' '+formatTime(t); return s; }
+    function getDeadlineSuffix(task) { const st=getDeadlineStatus(task),mins=getMinutesUntil(task),days=getDaysUntil(task); if(st==='overdue'){if(task.deadlineTime&&mins!==null){const a=Math.abs(mins);return a<60?` (${a}分超過)`:a<1440?` (${Math.floor(a/60)}時間超過)`:` (${Math.abs(days)}日超過)`;}return` (${Math.abs(days)}日超過)`;} if(st==='due-minutes')return mins<=0?' (まもなく)':` (あと${mins}分)`; if(st==='due-today'){if(task.deadlineTime&&mins!==null)return mins<60?` (あと${mins}分)`:` (あと${Math.floor(mins/60)}時間)`;return' (今日)';} if(st==='due-soon')return` (あと${days}日)`; return ''; }
+    function getSourceLabel(s) { return {mail:'メール',slack:'Slack',other:'その他'}[s]||s; }
+    function getPriorityLabel(p) { return {high:'高',medium:'中',low:'低'}[p]||p; }
+    function escapeHtml(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
     // ---- 描画 ----
+    function getFilteredAndSorted() {
+      const fs=document.getElementById('filterSource').value, fst=document.getElementById('filterStatus').value, sb=document.getElementById('sortBy').value;
+      let f=tasks.filter(t=>{if(fs!=='all'&&t.source!==fs)return false;if(fst==='active'&&t.completed)return false;if(fst==='completed'&&!t.completed)return false;return true;});
+      if(sb==='manual')return f; const po={high:0,medium:1,low:2};
+      f.sort((a,b)=>{if(sb==='deadline'){const da=getDeadlineDate(a),db=getDeadlineDate(b);if(!da&&!db)return 0;if(!da)return 1;if(!db)return-1;return da-db;}if(sb==='priority')return(po[a.priority]??1)-(po[b.priority]??1);return new Date(b.createdAt)-new Date(a.createdAt);});
+      return f;
+    }
     function renderTasks() {
-      const list = document.getElementById('taskList');
-      const filtered = getFilteredAndSorted();
-      const isManual = document.getElementById('sortBy').value === 'manual';
-      document.getElementById('taskCount').textContent = `未完了: ${tasks.filter(t => !t.completed).length}件`;
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>${tasks.length === 0 ? 'タスクを追加してみましょう' : '該当するタスクはありません'}</p></div>`;
-        return;
-      }
-      list.innerHTML = filtered.map(task => {
-        const st = getDeadlineStatus(task);
-        const cls = ['task-card', task.completed ? 'completed' : '', !task.completed && st ? st : ''].filter(Boolean).join(' ');
-        const rep = task.repeat && task.repeat !== 'none' ? `<span class="tag-repeat">🔄 ${getRepeatLabel(task.repeat)}</span>` : '';
-        const alt = task.alertBefore && task.alertBefore !== 'none' ? `<span class="tag-alert-time">🔔 ${getAlertLabel(task.alertBefore)}</span>` : '';
-        let dl = '';
-        if (task.deadline) {
-          const suf = getDeadlineSuffix(task), tm = task.deadlineTime ? ' ' + formatTime(task.deadlineTime) : '';
-          dl = `<span class="tag-deadline ${st}">📅 ${formatDate(task.deadline)}${tm}${suf}</span>`;
-        }
-        const dragAttrs = isManual
-          ? `draggable="true" ondragstart="onDragStart(event,'${task.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event)" ondrop="onDrop(event,'${task.id}')"`
-          : '';
-        const dragHandle = isManual ? '<div class="drag-handle" title="ドラッグで並び替え">⠿</div>' : '';
-        return `
-          <div class="${cls}" data-id="${task.id}" ${dragAttrs}>
-            ${dragHandle}
-            <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask('${task.id}')"></div>
-            <div class="task-body" onclick="openEditModal('${task.id}')">
-              <div class="task-title">${escapeHtml(task.title)}</div>
-              <div class="task-meta">
-                <span class="tag tag-${task.source}">${getSourceLabel(task.source)}</span>
-                ${dl}
-                <span class="tag-priority ${task.priority}">${getPriorityLabel(task.priority)}</span>
-                ${rep} ${alt}
-              </div>
-            </div>
-            <div class="task-actions">
-              <button class="btn-task-action" onclick="openEditModal('${task.id}')" title="編集">✎</button>
-              <button class="btn-task-action delete" onclick="deleteTask('${task.id}')" title="削除">✕</button>
-            </div>
-          </div>`;
+      const list=document.getElementById('taskList'),filtered=getFilteredAndSorted(),isManual=document.getElementById('sortBy').value==='manual';
+      document.getElementById('taskCount').textContent=`未完了: ${tasks.filter(t=>!t.completed).length}件`;
+      if(!filtered.length){list.innerHTML=`<div class="empty-state"><div class="icon">✅</div><p>${tasks.length===0?'タスクを追加してみましょう':'該当するタスクはありません'}</p></div>`;return;}
+      list.innerHTML=filtered.map(task=>{
+        const st=getDeadlineStatus(task),cls=['task-card',task.completed?'completed':'',!task.completed&&st?st:''].filter(Boolean).join(' ');
+        const rep=task.repeat&&task.repeat!=='none'?`<span class="tag-repeat">🔄 ${getRepeatLabel(task.repeat)}</span>`:'';
+        const alt=task.alertBefore&&task.alertBefore!=='none'?`<span class="tag-alert-time">🔔 ${getAlertLabel(task.alertBefore)}</span>`:'';
+        let dl='';if(task.deadline){const suf=getDeadlineSuffix(task),tm=task.deadlineTime?' '+formatTime(task.deadlineTime):'';dl=`<span class="tag-deadline ${st}">📅 ${formatDate(task.deadline)}${tm}${suf}</span>`;}
+        const da=isManual?`draggable="true" ondragstart="onDragStart(event,'${task.id}')" ondragend="onDragEnd(event)" ondragover="onDragOver(event)" ondrop="onDrop(event,'${task.id}')"`:'';
+        const dh=isManual?'<div class="drag-handle">⠿</div>':'';
+        return`<div class="${cls}" data-id="${task.id}" ${da}>${dh}<div class="task-checkbox ${task.completed?'checked':''}" onclick="toggleTask('${task.id}')"></div><div class="task-body" onclick="openEditModal('${task.id}')"><div class="task-title">${escapeHtml(task.title)}</div><div class="task-meta"><span class="tag tag-${task.source}">${getSourceLabel(task.source)}</span>${dl}<span class="tag-priority ${task.priority}">${getPriorityLabel(task.priority)}</span>${rep}${alt}</div></div><div class="task-actions"><button class="btn-task-action" onclick="openEditModal('${task.id}')" title="編集">✎</button><button class="btn-task-action delete" onclick="deleteTask('${task.id}')" title="削除">✕</button></div></div>`;
       }).join('');
     }
 
-    function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
     // ---- アラートバナー ----
     function updateAlertBanner() {
-      const banner = document.getElementById('alertBanner');
-      const urgent = tasks.filter(t => {
-        if (t.completed || !t.deadline) return false;
-        const m = getMinutesUntil(t), d = getDaysUntil(t);
-        return (m !== null && m <= 5 && t.deadlineTime) || (d !== null && d <= 3);
-      });
-      if (!urgent.length) { banner.classList.remove('show', 'has-overdue'); return; }
-      const overdue = urgent.filter(t => getMinutesUntil(t) < 0);
-      const dueMin = urgent.filter(t => { const m = getMinutesUntil(t); return m >= 0 && m <= 5 && t.deadlineTime; });
-      const dueToday = urgent.filter(t => { const m = getMinutesUntil(t), d = getDaysUntil(t); if (t.deadlineTime && m <= 5) return false; if (m < 0) return false; return d === 0; });
-      const dueSoon = urgent.filter(t => { const d = getDaysUntil(t), m = getMinutesUntil(t); return m >= 0 && d > 0 && d <= 3; });
-      let h = '<div class="alert-banner-title">⚠️ 対応が必要なタスク</div><ul class="alert-banner-list">';
-      overdue.forEach(t => { const m = Math.abs(getMinutesUntil(t)); const l = m < 60 ? `${m}分超過` : m < 1440 ? `${Math.floor(m/60)}時間超過` : `${Math.abs(getDaysUntil(t))}日超過`; h += `<li><span class="alert-badge">${l}</span> ${escapeHtml(t.title)}</li>`; });
-      dueMin.forEach(t => { const m = getMinutesUntil(t); h += `<li><span class="alert-badge">${m <= 0 ? 'まもなく' : `あと${m}分`}</span> ${escapeHtml(t.title)}</li>`; });
-      dueToday.forEach(t => { const m = getMinutesUntil(t); const l = t.deadlineTime && m > 0 ? (m < 60 ? `あと${m}分` : `あと${Math.floor(m/60)}時間`) : '今日'; h += `<li><span class="alert-badge warning">${l}</span> ${escapeHtml(t.title)}</li>`; });
-      dueSoon.forEach(t => { h += `<li><span class="alert-badge warning">あと${getDaysUntil(t)}日</span> ${escapeHtml(t.title)}</li>`; });
-      h += '</ul>';
-      banner.innerHTML = h;
-      banner.classList.add('show');
-      banner.classList.toggle('has-overdue', overdue.length > 0 || dueMin.length > 0);
+      const banner=document.getElementById('alertBanner');
+      const urgent=tasks.filter(t=>{if(t.completed||!t.deadline)return false;const m=getMinutesUntil(t),d=getDaysUntil(t);return(m!==null&&m<=5&&t.deadlineTime)||(d!==null&&d<=3);});
+      if(!urgent.length){banner.classList.remove('show','has-overdue');return;}
+      const ov=urgent.filter(t=>getMinutesUntil(t)<0),dm=urgent.filter(t=>{const m=getMinutesUntil(t);return m>=0&&m<=5&&t.deadlineTime;}),
+        dt=urgent.filter(t=>{const m=getMinutesUntil(t),d=getDaysUntil(t);if(t.deadlineTime&&m<=5)return false;if(m<0)return false;return d===0;}),
+        ds=urgent.filter(t=>{const d=getDaysUntil(t),m=getMinutesUntil(t);return m>=0&&d>0&&d<=3;});
+      let h='<div class="alert-banner-title">⚠️ 対応が必要なタスク</div><ul class="alert-banner-list">';
+      ov.forEach(t=>{const m=Math.abs(getMinutesUntil(t));const l=m<60?`${m}分超過`:m<1440?`${Math.floor(m/60)}時間超過`:`${Math.abs(getDaysUntil(t))}日超過`;h+=`<li><span class="alert-badge">${l}</span> ${escapeHtml(t.title)}</li>`;});
+      dm.forEach(t=>{const m=getMinutesUntil(t);h+=`<li><span class="alert-badge">${m<=0?'まもなく':`あと${m}分`}</span> ${escapeHtml(t.title)}</li>`;});
+      dt.forEach(t=>{const m=getMinutesUntil(t);const l=t.deadlineTime&&m>0?(m<60?`あと${m}分`:`あと${Math.floor(m/60)}時間`):'今日';h+=`<li><span class="alert-badge warning">${l}</span> ${escapeHtml(t.title)}</li>`;});
+      ds.forEach(t=>{h+=`<li><span class="alert-badge warning">あと${getDaysUntil(t)}日</span> ${escapeHtml(t.title)}</li>`;});
+      h+='</ul>';banner.innerHTML=h;banner.classList.add('show');banner.classList.toggle('has-overdue',ov.length>0||dm.length>0);
     }
-
-    function scrollToUrgent() {
-      const el = document.querySelector('.task-card.overdue, .task-card.due-minutes, .task-card.due-today, .task-card.due-soon');
-      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.outline = '2px solid var(--danger)'; setTimeout(() => el.style.outline = '', 2000); }
-    }
+    function scrollToUrgent(){const el=document.querySelector('.task-card.overdue,.task-card.due-minutes,.task-card.due-today,.task-card.due-soon');if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--danger)';setTimeout(()=>el.style.outline='',2000);}}
 
     // ---- トースト ----
-    function showToast(title, body, type = 'danger') {
-      const c = document.getElementById('toastContainer'), t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.innerHTML = `<div class="toast-title">${escapeHtml(title)}</div><div class="toast-body">${escapeHtml(body)}</div>`;
-      t.onclick = () => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); };
-      c.appendChild(t); playAlertSound();
-      setTimeout(() => { if (t.parentNode) { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); } }, 8000);
-    }
-
-    function playAlertSound() {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 0.2].forEach(d => { const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = 800; o.type = 'sine'; g.gain.value = 0.15; g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + d + 0.15); o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.15); });
-      } catch {}
-    }
+    function showToast(title,body,type='danger'){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<div class="toast-title">${escapeHtml(title)}</div><div class="toast-body">${escapeHtml(body)}</div>`;t.onclick=()=>{t.style.animation='toastOut 0.3s forwards';setTimeout(()=>t.remove(),300);};c.appendChild(t);if(type!=='success')playAlertSound();setTimeout(()=>{if(t.parentNode){t.style.animation='toastOut 0.3s forwards';setTimeout(()=>t.remove(),300);}},8000);}
+    function playAlertSound(){try{const ctx=new(window.AudioContext||window.webkitAudioContext)();[0,0.2].forEach(d=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=800;o.type='sine';g.gain.value=0.15;g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d+0.15);o.start(ctx.currentTime+d);o.stop(ctx.currentTime+d+0.15);});}catch{}}
 
     // ---- リマインダー ----
-    function requestNotification() {
-      if (!('Notification' in window)) { alert('このブラウザは通知に対応していません'); return; }
-      Notification.requestPermission().then(p => { if (p === 'granted') document.getElementById('notificationBar').classList.remove('show'); });
-    }
-    function isMinuteBasedAlert(a) { return a === '1min' || a === '5min'; }
-    function getAlertMinsBefore(a) { return { '1min': 1, '5min': 5 }[a] ?? 0; }
-    function getAlertDaysBefore(a) { return { 'same-day': 0, '1day': 1, '3days': 3, '1week': 7 }[a] ?? null; }
-
-    function checkReminders() {
-      let changed = false;
-      tasks.forEach(task => {
-        if (task.completed || !task.deadline) return;
-        const mins = getMinutesUntil(task), days = getDaysUntil(task);
-        if (!task.notified && mins !== null && mins <= 0) {
-          const am = Math.abs(mins);
-          let label;
-          if (task.deadlineTime) { label = am === 0 ? '⏰ 期限です' : am < 60 ? `⚠️ ${am}分超過` : `⚠️ ${Math.floor(am/60)}時間超過`; }
-          else { label = days < 0 ? `⚠️ ${Math.abs(days)}日超過` : '⏰ 今日が期限'; }
-          sendNotif(`${label}: ${task.title}`, `ソース: ${getSourceLabel(task.source)}`);
-          showToast(label, task.title);
-          task.notified = true; changed = true;
-        }
-        if (!task.alertNotified && task.alertBefore && task.alertBefore !== 'none') {
-          let fire = false, msg = '';
-          if (isMinuteBasedAlert(task.alertBefore)) {
-            if (task.deadlineTime && mins !== null && mins <= getAlertMinsBefore(task.alertBefore) && mins >= 0) { fire = true; msg = mins === 0 ? '期限です' : `あと${mins}分で期限`; }
-          } else {
-            const ad = getAlertDaysBefore(task.alertBefore);
-            if (ad !== null && days <= ad && days >= 0) {
-              fire = true;
-              if (days === 0) { msg = task.deadlineTime && mins > 0 ? (mins < 60 ? `あと${mins}分で期限` : `あと${Math.floor(mins/60)}時間で期限`) : '今日が期限です'; }
-              else { msg = `あと${days}日で期限です`; }
-            }
-          }
-          if (fire) { sendNotif(`🔔 ${msg}: ${task.title}`, `ソース: ${getSourceLabel(task.source)}`); showToast(`🔔 ${msg}`, task.title, 'warning'); task.alertNotified = true; changed = true; }
-        }
-      });
-      if (changed) saveTasks();
-      renderTasks(); updateAlertBanner();
-    }
-
-    function sendNotif(title, body) {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📋</text></svg>' });
-    }
-
-    function initNotificationBar() { if ('Notification' in window && Notification.permission === 'default') document.getElementById('notificationBar').classList.add('show'); }
+    function requestNotification(){if(!('Notification' in window)){alert('このブラウザは通知に対応していません');return;}Notification.requestPermission().then(p=>{if(p==='granted')document.getElementById('notificationBar').classList.remove('show');});}
+    function isMinuteBasedAlert(a){return a==='1min'||a==='5min';}
+    function getAlertMinsBefore(a){return{'1min':1,'5min':5}[a]??0;}
+    function getAlertDaysBefore(a){return{'same-day':0,'1day':1,'3days':3,'1week':7}[a]??null;}
+    function checkReminders(){let changed=false;tasks.forEach(task=>{if(task.completed||!task.deadline)return;const mins=getMinutesUntil(task),days=getDaysUntil(task);if(!task.notified&&mins!==null&&mins<=0){const am=Math.abs(mins);let label;if(task.deadlineTime){label=am===0?'⏰ 期限です':am<60?`⚠️ ${am}分超過`:`⚠️ ${Math.floor(am/60)}時間超過`;}else{label=days<0?`⚠️ ${Math.abs(days)}日超過`:'⏰ 今日が期限';}sendNotif(`${label}: ${task.title}`,`ソース: ${getSourceLabel(task.source)}`);showToast(label,task.title);task.notified=true;changed=true;}if(!task.alertNotified&&task.alertBefore&&task.alertBefore!=='none'){let fire=false,msg='';if(isMinuteBasedAlert(task.alertBefore)){if(task.deadlineTime&&mins!==null&&mins<=getAlertMinsBefore(task.alertBefore)&&mins>=0){fire=true;msg=mins===0?'期限です':`あと${mins}分で期限`;}}else{const ad=getAlertDaysBefore(task.alertBefore);if(ad!==null&&days<=ad&&days>=0){fire=true;if(days===0){msg=task.deadlineTime&&mins>0?(mins<60?`あと${mins}分で期限`:`あと${Math.floor(mins/60)}時間で期限`):'今日が期限です';}else{msg=`あと${days}日で期限です`;}}}if(fire){sendNotif(`🔔 ${msg}: ${task.title}`,`ソース: ${getSourceLabel(task.source)}`);showToast(`🔔 ${msg}`,task.title,'warning');task.alertNotified=true;changed=true;}}});if(changed)saveTasks();renderTasks();updateAlertBanner();}
+    function sendNotif(title,body){if(!('Notification' in window)||Notification.permission!=='granted')return;new Notification(title,{body,icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">📋</text></svg>'});}
+    function initNotificationBar(){if('Notification' in window&&Notification.permission==='default')document.getElementById('notificationBar').classList.add('show');}
 
     // ---- エクスポート/インポート ----
-    function exportTasks() {
-      const b = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(b);
-      a.download = `tasks-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
-    }
-    function showImportModal() { document.getElementById('importModal').classList.add('active'); }
-    function closeImportModal() { document.getElementById('importModal').classList.remove('active'); document.getElementById('importFile').value = ''; }
-    function importTasks() {
-      const f = document.getElementById('importFile').files[0];
-      if (!f) { alert('ファイルを選択してください'); return; }
-      const r = new FileReader();
-      r.onload = e => { try { const d = JSON.parse(e.target.result); if (!Array.isArray(d)) throw 0; tasks = d; saveTasks(); renderTasks(); updateAlertBanner(); closeImportModal(); } catch { alert('無効なファイル形式です'); } };
-      r.readAsText(f);
-    }
+    function exportTasks(){const b=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`tasks-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);}
+    function showImportModal(){document.getElementById('importModal').classList.add('active');}
+    function closeImportModal(){document.getElementById('importModal').classList.remove('active');document.getElementById('importFile').value='';}
+    function importTasks(){const f=document.getElementById('importFile').files[0];if(!f){alert('ファイルを選択してください');return;}const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(!Array.isArray(d))throw 0;tasks=d;saveTasks();renderTasks();updateAlertBanner();closeImportModal();}catch{alert('無効なファイル形式です');}};r.readAsText(f);}
 
     // ---- イベント ----
-    document.getElementById('taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addTask(); } });
-    document.getElementById('editTitle').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveEdit(); } });
-    document.getElementById('importModal').addEventListener('click', function(e) { if (e.target === this) closeImportModal(); });
-    document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) closeEditModal(); });
+    document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTask();}});
+    document.getElementById('editTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveEdit();}});
+    document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this)closeImportModal();});
+    document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)closeEditModal();});
+    document.getElementById('syncModal').addEventListener('click',function(e){if(e.target===this)closeSyncModal();});
 
     // ---- 初期化 ----
     loadTasks(); renderTasks(); updateAlertBanner(); initNotificationBar();
     checkReminders(); setInterval(checkReminders, 15000);
+
+    // 同期開始
+    if (syncCode) {
+      startRealtimeSync();
+    } else {
+      // 初回訪問時に同期モーダルを表示
+      setTimeout(() => showSyncModal(), 500);
+    }
   </script>
 </body>
 </html>
